@@ -2,3 +2,4 @@
 *.txt
 *.gch
 *.out
+.DS_Store
