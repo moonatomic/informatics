@@ -21,7 +21,7 @@ int main(void) {
     for (int i = 0; i <= STAGES; i++) {
         N = power(2, i);
         fillData(mass1, mass2, N * PACK);
-        measureTime(mass1, mass2, N, timing);
+        measureTime(mass1, mass2, N * PACK, timing);
         output(timing, N);
     }
     return 0;
