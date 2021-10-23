@@ -19,7 +19,7 @@ void selectionSort(int *mass, int len, int * index) {
             }
         }
         temp = index[iter];
-        index[iter] = index[mindex];
+        index[iter] = index[mindex]; // Обмен индексов
         index[mindex] = temp;
 
         iter++;

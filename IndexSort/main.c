@@ -11,14 +11,13 @@ int main(void) {
 
     FILE * data;
 
+    int index[MASS_LEN];
     double timing[2];
 
     srand(time(NULL)); // Для максимально случайной генерации чисел
 
     data = fopen("data.txt", "w"); // Очистка файла с данными в начале работы
     fclose(data);
-
-    int index[MASS_LEN];
     
     for (int i = 0; i < STAGES; i++) {
         N = power(2, i);
@@ -30,7 +29,7 @@ int main(void) {
 
         measureTime(mass1, mass2, N * PACK, timing, index); // замеряем время работы
         /*
-        for (int i = 0; i < N * PACK; i++) {
+        for (int i = 0; i < N * PACK; i++) {     // Отладка
             printf("%d ", index[i]);
         }
         */

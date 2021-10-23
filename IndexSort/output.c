@@ -4,16 +4,16 @@
 
 #include "headers.h"
 
-void output(double * timing, int N) {
+void output(double * timing, int N) {  // Функция вывода результатов в удобном виде
     printf("-----------------------\n");
-    printf("Result for %d elements:\n", N * PACK);
+    printf("Result for %d elements:\n", N * PACK); // Длина массива
     printf("\n");
-    printf("SelectionSort:\n");
+    printf("SelectionSort:\n"); // Время для selectionSort()
     if (timing[0] == -1) {
-        printf("sorting failed\n");
+        printf("sorting failed\n"); // Ошибка при сортировке
     } else {
         printf("%lf seconds\n", timing[0]);
     }
-    printf("QuickSort:\n");
+    printf("QuickSort:\n"); // Время для qSort()
     printf("%lf seconds\n", timing[1]);
 }
