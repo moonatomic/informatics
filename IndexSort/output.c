@@ -1,8 +1,9 @@
 /*
 (c) 2021 Петров Михаил Вадимович группа 112
 */
-
+#define PACK 1000
 #include "headers.h"
+#include <stdio.h>
 
 void output(double * timing, int N) {  // Функция вывода результатов в удобном виде
     printf("-----------------------\n");
