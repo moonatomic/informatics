@@ -2,6 +2,8 @@
 (c) 2021 Петров Михаил Вадимович группа 112
 */
 
+#include <stdio.h>
+#include <time.h>
 #include "headers.h"
 
 void measureTime(int * mass1, int * mass2, int N, double * timing) {

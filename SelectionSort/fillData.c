@@ -3,6 +3,8 @@
 */
 
 #include "headers.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 void fillData(int * mass1, int * mass2, int size) { // Заполняем 2 массива случайными числами
     int number;

@@ -5,21 +5,22 @@
 #include "headers.h"
 
 void selectionSort(int *mass, int len) {
-    int iter = 0; 
-    int change; // Вспомогательная переменная для обмена
-    int min;
-    int ind;
+    int iter = 0; // Граница отсортрованной части массива
+    int min; // Минимальное значение неотсортированной части
+    int mindex;
+    int temp; // Переменная для обмена значениями
+
     while (iter < len) {
         min = mass[iter];
-        for (int i = iter; i < len; i++) {
+        for (int i = iter; i < len; i++) { // Идём по неотсортированной части массива
             if (mass[i] < min) {
                 min = mass[i];
-                ind = i;
+                mindex = i;
             }
         }
-        change = mass[iter];
-        mass[iter] = min;
-        mass[ind] = change;
+        temp = mass[iter];
+        mass[iter] = min; // Обмен индексов
+        mass[mindex] = temp;
         iter++;
     }
 }
