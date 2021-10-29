@@ -35,11 +35,6 @@ int main(void) {
         }
 
         measureTime(mass1, mass2, N * PACK, timing, index); // замеряем время работы
-        /*
-        for (int i = 0; i < N * PACK; i++) {     // Отладка
-            printf("%d ", index[i]);
-        }
-        */
         output(timing, N); // выводим результат в удобном для восприятия формате
     }
     return 0;
