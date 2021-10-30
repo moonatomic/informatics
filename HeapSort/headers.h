@@ -10,3 +10,4 @@ void output(double * timing, int N); // Функция вывода резуль
 int power(int a, int b); // Функция возведения в степень 
 void measureTime(int * mass1, int * mass2, int * mass3, int N, double * timing); // Функция замера времени
 void heapSort(int * mass, int len); // Пирамидальная сортировка 
+void buildHeap(int * mass, int len); // Постройка бинарного дерева сортировки
