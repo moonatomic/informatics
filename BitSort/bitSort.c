@@ -1,0 +1,39 @@
+/*
+(c) 2021 Петров Михаил Вадимович группа 112
+*/
+
+#include "headers.h"
+
+void bitSort(int * mass, int len) {
+    int j;
+    int index;
+    int temp;
+    
+    buildHeap(mass, len); // Строим бинарное сортирующее дерево
+
+    for (int i = len-1; i > 0; i--) {
+
+        temp = mass[0]; // Меняем местами первый и последний элемент (убираем корень дерева)
+        mass[0] =  mass[i];
+        mass[i] = temp;
+
+        j = 0;
+
+        do {
+            index = (2 * j + 1);
+            if (countBits(mass[index]) < countBits(mass[index + 1]) && index < (i - 1)) {
+                index++;
+            }
+
+            if (countBits(mass[j]) < countBits(mass[index]) && index < i) { // 
+                temp = mass[j];
+                mass[j] = mass[index];
+                mass[index] = temp;
+            }
+            j = index;
+        } while (index < i);
+    }
+    temp = mass[0]; // Меняем местами первый и последний элемент (убираем корень дерева)
+    mass[0] =  mass[len-1];
+    mass[len-1] = temp;
+}
