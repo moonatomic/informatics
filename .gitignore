@@ -4,4 +4,4 @@
 *.out
 .DS_Store
 !out.txt
-test
+Playground/
