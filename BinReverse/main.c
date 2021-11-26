@@ -22,7 +22,7 @@ int main(void) {
         }
     }
 
-    number = reverse(number); // Зеркально отражаем число и выводим десятичную форму
+    number = reverse(number); // Зеркально отражаем число
     bin(number, bits);
     printf("\nReversed BIN: ");
     for (int i = 0; i < 32; i++) {
