@@ -3,12 +3,15 @@
 */
 
 #include "headers.h"
+#define FIRST_BIT -2147483648
 
-void reverse(char * arr) {
-    int temp;
-    for (int i = 0; i < 16; i++) {
-        temp = arr[i];      //
-        arr[i] = arr[31-i]; // Обмен значений симметричных битов 
-        arr[31-i] = temp;   //
+int reverse(int number) {
+    int result = 0;
+    for (int i = 0; i < 32; i++) {
+        if ((number & FIRST_BIT) == FIRST_BIT) {
+            result += power(2, i);
+        }
+        number = number << 1;
     }
+    return result;
 }

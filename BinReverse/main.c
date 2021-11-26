@@ -17,17 +17,17 @@ int main(void) {
 
     for (int i = 0; i < 32; i++) { // Выводим число в BIN
         printf("%d", bits[i]);
-        if (i%4 == 3) {
+        if (i%8 == 7) {
             printf(" ");
         }
     }
 
-    reverse(bits); // Зеркально отражаем число и выводим десятичную форму
-    number = dec(bits);
+    number = reverse(number); // Зеркально отражаем число и выводим десятичную форму
+    bin(number, bits);
     printf("\nReversed BIN: ");
     for (int i = 0; i < 32; i++) {
         printf("%d", bits[i]);
-        if (i%4 == 3) {
+        if (i%8 == 7) {
             printf(" ");
         }
     }
