@@ -19,7 +19,7 @@ int main(void) {
     scanf("%d", &k); // Запрашиваем k
     fout = fopen("out.txt", "w"); // Открываем файл для вывода
 
-    amount = power(2, N);
+    amount = power(N);
 
     for (int i = 0; i < amount; i++) { // Перебираем k-значные маски булеана N
         if (countBits(i) == k) { 

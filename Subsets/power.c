@@ -4,10 +4,10 @@
 
 #include "headers.h"
 
-int power(int a, int b) { // Простое возведение в степень
+int power(int a) { // Бинарное возведение в степень
     int number = 1;
-    for (int i = 0; i < b; i++) {
-        number *= a;
+    for (int i = 0; i < a; i++) {
+        number = number << 1;
     }
     return number;
 }

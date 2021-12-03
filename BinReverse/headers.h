@@ -4,4 +4,4 @@
 
 void bin(int number, char * arr); // Двоичное представление числа
 int reverse(int number); // Зеркальное отражение двоичного представления числа
-int power(int a, int b); // Простое возведение в степень
+int power(int a); // Бинарное возведение в степень
