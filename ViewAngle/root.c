@@ -10,7 +10,7 @@ double root(double number) {
     }
     float ans = number;
     for (int i = 0; i < 10; i++) {
-        ans = 0.5 * (ans + number/ans);
+        ans = 0.5 * (ans + number/ans); // Применяем оценку
     }
     return ans;
 }

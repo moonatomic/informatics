@@ -1,4 +1,4 @@
-build: main.o bitSort.o countBits.o fillData.o isSorted.o output.o bin.o copyData.o compare.o buildHeap.o headers.h 
+build: main.o bitSort.o countBits.o fillData.o isSorted.o output.o bin.o buildHeap.o headers.h 
 	gcc $^
 	make clean
 main.o: main.c
@@ -14,10 +14,6 @@ isSorted.o: isSorted.c
 output.o: output.c
 	gcc -c $^
 bin.o: bin.c
-	gcc -c $^
-copyData.o: copyData.c
-	gcc -c $^
-compare.o: compare.c
 	gcc -c $^
 buildHeap.o: buildHeap.c
 	gcc -c $^
