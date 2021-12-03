@@ -33,7 +33,9 @@ void bitSort(int * mass, int len) {
             j = index;
         } while (index < i);
     }
+    /*
     temp = mass[0]; // Меняем местами первый и последний элемент (убираем корень дерева)
     mass[0] =  mass[len-1];
     mass[len-1] = temp;
+    */
 }
