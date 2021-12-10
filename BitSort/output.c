@@ -15,6 +15,9 @@ void output(FILE * fout, int * mass, int len) {
         fprintf(fout, "%d\t\t", number);
         for (int j = 0; j < 32; j++) {
             fprintf(fout, "%d", bits[j]);
+            if (j%8 == 7) {
+                fprintf(fout, " ");
+            }
         }
         fprintf(fout, "\t\t%d\n", ones);
     }
