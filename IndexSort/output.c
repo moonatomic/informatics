@@ -1,6 +1,7 @@
 /*
 (c) 2021 Петров Михаил Вадимович группа 112
 */
+
 #define PACK 1000
 #include "headers.h"
 #include <stdio.h>

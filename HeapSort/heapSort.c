@@ -1,6 +1,7 @@
 /*
 (c) 2021 Петров Михаил Вадимович группа 112
 */
+
 #include "headers.h"
 
 void heapSort(int * mass, int len) {

@@ -1,6 +1,7 @@
 /*
 (c) 2021 Петров Михаил Вадимович группа 112
 */
+
 #include <stdio.h>
 #include <stdlib.h>
 
