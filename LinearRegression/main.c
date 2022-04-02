@@ -4,62 +4,51 @@
 
 #include "headers.h"
 #include <stdio.h>
-#define ARR_LEN 10
+#define ARR_LEN 100
 
 int main(void) {
     double pointsX[ARR_LEN]; // Координаты точек на вход
     double pointsY[ARR_LEN];
-    double prX[3];           // Значения для предсказания 
-    double prY[3];
-    double ans[2];
-    double maxX = 0;         // Границы отрезка 
-    double minX = 0;
-    double xval, yval;
+    double ans[2]; // Пара для коэффициентов прямой регрессии
+    double xval, yval; // Координаты вводимых точек
+    double prx, pry; // Координаты предсказанной точки
+
+    char Err;
+
+    int amount = 0;
 
     FILE * pts;   // Точки для интерполяции     
     FILE * prpts; // Предсказанные точки
 
-    prpts = fopen("prpoints.txt", "w");
+    prpts = fopen("prpoints.txt", "w"); // Открываем файлы для сохранения точек
     pts = fopen("points.txt", "w");
 
-    printf("Enter %d points to interpolate in 'X Y' format e.g. '5 10'\n", ARR_LEN); // Спрашиваем точки
-    for (int i = 0; i < ARR_LEN; i++) {
-        scanf("%lf %lf", &xval, &yval);
-        pointsX[i] = xval;
-        pointsY[i] = yval;
-        if (xval > maxX) {
-            maxX = xval;
+    printf("Enter the amount of points for interpolation (up to %d): ", ARR_LEN); // Спрашиваем количество точек
+    scanf("%d", &amount);
+
+
+    printf("Enter points to interpolate in 'X Y' format e.g. '5 10'\n"); // Спрашиваем точки
+    for (int i = 0; i < amount; i++) {
+        if (scanf("%lf %lf", &xval, &yval) != 2) {
+            break;
+        } else {
+            pointsX[i] = xval;
+            pointsY[i] = yval;
+            fprintf(pts, "%lf %lf\n", xval, yval);
         }
-        if (pointsX[i] < minX) { // Обновляем границы
-            minX = xval;
-        }
-        fprintf(pts, "%lf %lf\n", xval, yval); // Сохраняем точки в файл 
     }
 
-    interpolate(pointsX, pointsY, ans); // Интерполируем, получаем коэффициенты
-    
+    printf("Enter X-value to predict Y: "); // Запрашиваем точку для предсказания
+    scanf("%lf", &prx);
+    pry = interpolate(pointsX, pointsY, amount, prx,  ans, &Err); // Интерполируем, получаем коэффициенты
     printf("Coefficients calculated: a = %lf, b = %lf\n", ans[0], ans[1]); // Выводим их
+    if (Err == 0) {
+        printf("Predicted point: %lf %lf\n", prx, pry);
+        fprintf(prpts, "%lf %lf", prx, pry);
+    } else {
+        printf("You entered incorrect data: X-value you entered does not belong to interval\n");
+    }
     
-    printf("Enter 3 X-values to predict Y\n"); // Запрашиваем 3 точки для предсказания
-    for (int i = 0; i < 3; i++) {
-        scanf("%lf", &xval);
-        prX[i] = xval;
-        if (xval < minX || xval > maxX) { // Если хотя бы одна вываливается из промежутка - БАН
-            printf("Incorrect value: X-value doesn't belong to initial interval.\n");
-            return -1;
-        }
-        
-    }
-
-    for (int i = 0; i < 3; i++) { // Получаем и выводим предсказанные точки
-        prY[i] = predict(ans[0], ans[1], prX[i]);
-    }
-
-    printf("Predicted points:\n");
-    for (int i = 0; i < 3; i++) {
-        printf("%lf %lf\n", prX[i], prY[i]);
-        fprintf(prpts, "%lf %lf\n", prX[i], prY[i]);
-    }
 
     fclose(pts);
     fclose(prpts);
