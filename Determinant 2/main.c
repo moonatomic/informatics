@@ -9,8 +9,8 @@
 #define NAME_LEN 100
 
 int main(void) {
-    double ** matrix; // Указатель на матрицу
-    double ** rmatrix; // Указатель на резервную матрицу
+    double * matrix; // Указатель на матрицу
+    double * rmatrix; // Указатель на резервную матрицу
     double number;
     double ans;
     double rans;
@@ -26,14 +26,8 @@ int main(void) {
     printf("Enter matrix size: "); // Запрашиваем размер матрицы
     scanf("%d", &size);
 
-    matrix = (double **)malloc(size * sizeof(double *)); // Выделяем память под матрицу (массив строк)
-    for (int i = 0; i < size; i++) {
-        matrix[i] = (double *)malloc(size * sizeof(double));
-    }
-    rmatrix = (double **)malloc(size * sizeof(double *)); // Выделяем память под резервную матрицу (массив строк)
-    for (int i = 0; i < size; i++) {
-        rmatrix[i] = (double *)malloc(size * sizeof(double));
-    }
+    matrix = (double *)malloc(size*size * sizeof(double)); // Выделяем память под матрицу 
+    rmatrix = (double *)malloc(size*size * sizeof(double)); // Выделяем память под резервную матрицу 
 
     printf("Select matrix input mode:\n1) From file\n2) Random generated\n"); // Спрашиваем режим работы
     scanf("%d", &mode);
@@ -50,7 +44,7 @@ int main(void) {
         for (int i = 0; i < size; i++) { // Считываем матрицу
             for (int j = 0; j < size; j++) {
                 if (fscanf(mat_in, "%lf", &number) == 1) {
-                    matrix[i][j] = number;
+                    matrix[i*size + j] = number;
                 } else {
                     printf("Incorrect data in file %s\n", filename); // Если данные некорректные, выбрасываем ошибку
                     return -3;
@@ -72,12 +66,12 @@ int main(void) {
         ans = determinant(matrix, size); // Иначе - считаем его
     }
 
-    /* 
-    * Отладочная печать
+    ///* 
+    //* Отладочная печать
     printf("\n");
     print_matrix(rmatrix, size);
     printf("\n");
-    */
+    //*/
 
     if (checkdet(rmatrix, size, ans) == 1) {
         printf("Determinant of given matrix: %lf\n", ans); // Выводим результат
