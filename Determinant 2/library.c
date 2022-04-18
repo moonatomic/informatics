@@ -14,7 +14,7 @@ double fabs(double a) {
     return a > 0 ? a : -a;
 }
 
-// Приводит матрицу по адресу &&matrix порядка size к верхнетреугольному виду
+// Приводит матрицу по адресу &matrix порядка size к верхнетреугольному виду
 // Код ошибки (индикатор вырожденности) хранится по адресу &Err
 // Ничего не возвращает 
 void gauss(double * matrix, int size, char * Err) {
@@ -119,7 +119,7 @@ void multiply(double * matrix, int size, double val) {
     }
 }
 
-// Генерирует матрицу порядка size по адресу &&matrix с действительными коэффициентами от -1 до 1
+// Генерирует матрицу порядка size по адресу &matrix с действительными коэффициентами от -1 до 1
 // Ничего не возвращает
 void generate(double * matrix, int size) {
     double number;

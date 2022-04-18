@@ -26,7 +26,7 @@ void multiply(double * matrix, int size, double val);
 // Умножает первую строку матрицы matrix порядка size на значение val
 // Ничего не возвращает
 void generate(double * matrix, int size);
-// Генерирует матрицу порядка size по адресу &&matrix с действительными коэффициентами от -1 до 1
+// Генерирует матрицу порядка size по адресу &matrix с действительными коэффициентами от -1 до 1
 // Ничего не возвращает
 void save_matrix(double * matrix, int size);
 // Записывает матрицу matrix порядка size в файл 
