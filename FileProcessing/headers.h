@@ -3,11 +3,12 @@
 */
 #include <stdio.h>
 
-int check_symbol(char c);
-// Проверяет символ c на валидность
+int check_symbol(char c, char* syms, int size);
+// Проверяет символ c на валидность в соответствие с массивом разделителей syms размера size
 // Возвращает 1, если символ плохой, иначе 0
-int read(FILE* fin, FILE* fout); 
+int read(FILE* fin, FILE* fout, char* syms, int size); 
 // Выводит все слова из файла fin в файл fout в порядке их появления
+// Использует массив разделителей syms размера size
 // Возвращает количество прочитанных слов
 char* strcat_(char* s1, char* s2); // Присоединяет s2 к s1, возвращает s1
 char* strncat_(char* s1, char* s2, int n); // Присоединяет не более n символов s2 к s1, завершает строку символом '\0', возвращает s1

@@ -4,6 +4,7 @@
 
 #include <stdio.h>
 #include "headers.h"
+#define SIZE 36
 
 int main(void) {
     node* root = NULL;
@@ -11,6 +12,7 @@ int main(void) {
     char out_filename[120];
 	char str[120] = "\0";
 	char c[2];
+	char syms[SIZE] = {'#', '<', '>', '{', '}', '|', '[', ']', ';', '*', '(', ')', '=', '"', '%', '!', '\'', '\\', ' ', ',', '-', ':', '\n', '+', '&', '.', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 	FILE* ifile;
 	FILE* ofile;
 
@@ -28,7 +30,7 @@ int main(void) {
 
 	c[1] = '\0';
 	while (fscanf(ifile, "%c", c) != EOF) { // Считываем слова из файла
-		if (check_symbol(c[0])) { // Если символ разделительный и строка непустая
+		if (check_symbol(c[0], syms, SIZE)) { // Если символ разделительный и строка непустая
 			if (str[0] != '\0') {
                 root = add(str, root); // Добавляем ее в дерево
             }

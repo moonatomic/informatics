@@ -7,15 +7,16 @@
 #define STR_LEN 120
 
 // Выводит все слова из файла fin в файл fout в порядке их появления
+// Использует массив разделителей syms размера size
 // Возвращает количество прочитанных слов
-int read(FILE* fin, FILE* fout) {
+int read(FILE* fin, FILE* fout, char* syms, int size) {
     int am = 0;
     char c[2];
     char str[STR_LEN];
     c[1] = '\0';
     c[0] = '\0';
     while (fscanf(fin, "%c", c) != EOF) { // Считываем слова из файла
-        if (check_symbol(c[0])) { // Если символ разделительный и строка непустая
+        if (check_symbol(c[0], syms, size)) { // Если символ разделительный и строка непустая
             if (str[0] != '\0') {
                 fprintf(fout, "%s\n", str); // Добавляем слово в файл
                 am++;
@@ -29,15 +30,13 @@ int read(FILE* fin, FILE* fout) {
     return am;
 }
 
-// Проверяет символ c на валидность
+// Проверяет символ c на валидность в соответствие с массивом разделителей syms размера size 
 // Возвращает 1, если символ плохой, иначе 0
-int check_symbol(char c) {
-    if (c == '#' || c == '<' || c == '>' || c == '{' || c == '}' || c == '|' ||
-        c == '[' || c == ']' || c == ';' || c == '*' || c == '(' || c == ')' ||
-        c == '=' || c == '"' || c == '%' || c == '!' || c == '\'' || c == '\\' ||
-        c == ' ' || c == ',' || c == '-' || c == ':' || c == '\n' ||
-        c == '+' || c == '&' || (c >= '0' && c <= '9')) {
-        return 1;
+int check_symbol(char c, char* syms, int size) {
+    for (int i = 0; i < size; i++) {
+        if (c == syms[i]) {
+            return 1;
+        }
     }
     return 0;
 }

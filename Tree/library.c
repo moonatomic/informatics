@@ -89,14 +89,12 @@ char* strncat_(char* s1, char* s2, int n) { // Присоединяет не б�
     return s1;
 }
 
-int check_symbol(char c) {
-    if (c == '#' || c == '<' || c == '>' || c == '{' || c == '}' || c == '|' ||
-        c == '[' || c == ']' || c == ';' || c == '*' || c == '(' || c == ')' ||
-        c == '=' || c == '"' || c == '%' || c == '!' || c == '\'' || c == '\\' ||
-        c == ' ' || c == ',' || c == '-' || c == ':' || c == '\n' ||
-        c == '+' || c == '&' || (c >= '0' && c <= '9')) {
+int check_symbol(char c, char* syms, int size) {
+    for (int i = 0; i < size; i++) {
+        if (c == syms[i]) {
             return 1;
         }
+    }
     return 0;
 }
 

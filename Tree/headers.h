@@ -12,13 +12,13 @@ typedef struct tree {
 
 node* add(char word[], node* tree);
 // Добавляет слово word в дерево tree
-// Возвращает дерево tree
+// Ничего не возвращает
 void treeprint(node* tree, FILE* fout);
 // Выводит дерево tree
 // Ничего не возвращает
-int check_symbol(char c);
-// Проверяет символ c на валидность
-// Возвращает 1, если символ плохой, иначе 0
+int check_symbol(char c, char* syms, int size);
+// Проверяет символ c на валидность в соотвествие с массивом разделителей syms
+// Возвращает 1, если символ разделительный, иначе 0
 char* strcat_(char* s1, char* s2); // Присоединяет s2 к s1, возвращает s1
 char* strncat_(char* s1, char* s2, int n); // Присоединяет не более n символов s2 к s1, завершает строку символом '\0', возвращает s1
 char* strcpy_(char* s1, char* s2); // Копирует строку s2 в строку s1, включая '\0', возвращает s1
