@@ -6,3 +6,4 @@
 !out.txt
 Playground/
 *.xcodeproj
+.vscode/
