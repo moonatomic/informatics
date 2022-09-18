@@ -104,7 +104,7 @@ std::vector<Point> Field::get_points() {
     return points; // Возвращаем (копию?) вектора точек
 }
 
-void Exec::save() {
+void Exec::save() { // Сохранение слепка поля
     std::string filename = "OUT_" + std::to_string(id) + ".txt"; // Открываем файл по id процесса
     std::ofstream out;
     out.open(filename);
@@ -112,7 +112,7 @@ void Exec::save() {
     std::cout << "Saving points" << std::endl;
 
     std::vector<Point> points = id_field.get_points(); // Получаем точки поля
-    std::cout << points.size() << std::endl;
+    // std::cout << points.size() << std::endl;
     for (Point &point : points) { // И записываем их координаты в файл
         out << point.x << point.y << std::endl;
     }
