@@ -27,7 +27,7 @@ private:
     void add_point(Point &point);
     std::vector<Point> points;
 public:
-    friend class Controller;
+    // friend class Controller;
     // Field(const Field &field) {}; Конструктор копирования поля field
     std::vector<Point> get_points(); // Функция получения точек из поля
     void generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y); // Функция генерации облака точек: принимает количество точек, матожидание и стандартное отклонение (по Гауссу)

@@ -76,7 +76,7 @@ void Interface::start() {
 
 void Controller::process(Field &field, int process_id, int amount, double center_x, double center_y, double deviation_x, double deviation_y) {
     field.generate(amount, center_x, center_y, deviation_x, deviation_y); // Генерируем облако на amount элементов с соответствующими параметрами
-    std::cout << "Generated cloud with " << field.points.size() << " points" << std::endl;
+    // std::cout << "Generated cloud with " << field.points.size() << " points" << std::endl;
     Exec process(process_id, field); // Создаем новый процесс
     process.save(); // Сохраняем слепок процесса
 }
@@ -114,7 +114,7 @@ void Exec::save() { // Сохранение слепка поля
     std::vector<Point> points = id_field.get_points(); // Получаем точки поля
     // std::cout << points.size() << std::endl;
     for (Point &point : points) { // И записываем их координаты в файл
-        out << point.x << point.y << std::endl;
+        out << point.x << " " << point.y << std::endl;
     }
     out.close();
 }
