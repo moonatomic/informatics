@@ -23,7 +23,7 @@ int main(void) {
 
     FILE * mat_in;
 
-    printf("Enter matrix size: "); // Запрашиваем размер матрицы
+    printf("Hello! This program calculates determinant of given matrix via Gauss method\nPlease enter matrix size: "); // Запрашиваем размер матрицы
     scanf("%d", &size);
 
     matrix = (double **)malloc(size * sizeof(double *)); // Выделяем память под матрицу (массив строк)
@@ -72,15 +72,10 @@ int main(void) {
         ans = determinant(matrix, size); // Иначе - считаем его
     }
 
-    /* 
-    * Отладочная печать
-    printf("\n");
-    print_matrix(rmatrix, size);
-    printf("\n");
-    */
-
-    if (checkdet(rmatrix, size, ans) == 1) {
+    if (checkdet(rmatrix, size, ans, &rans) == 1) {
         printf("Determinant of given matrix: %lf\n", ans); // Выводим результат
+        printf("Determinant of copy of given matrix with interchanged lines 1 & 2: %lf\n", rans);
+        printf("The answer is correct!\n");
     } else {
         printf("An error occured while computing determinant of the given matrix.\n");
     }

@@ -31,7 +31,7 @@ void generate(double ** matrix, int size);
 void save_matrix(double ** matrix, int size);
 // Записывает матрицу matrix порядка size в файл 
 // Ничего не возвращает
-int checkdet(double ** matrix, int size, double ans);
+int checkdet(double ** matrix, int size, double ans, double *rans);
 // Проверяет правильность вычисления определителя матрицы matrix порядка size
 // Возвращает 1 если ans - правильный ответ, иначе - 0
 void copy_matrix(double ** matrix, double ** rmatrix, int size);

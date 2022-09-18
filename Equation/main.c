@@ -15,7 +15,7 @@ int main(void) {
     scanf("%lf", &alpha);
 
     ans = root(primitive, derivative, -1 + 10e-3, 1 - 10e-3, &Err); // Вычисляем корень интегрального уравнения
-    if (ans == 0) {
+    if (Err == 1) {
         printf("No root for a = %lf\n", alpha);
         return 0;
     }

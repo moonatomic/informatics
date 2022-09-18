@@ -27,7 +27,7 @@ int main(void) {
 
     data = fopen("data.txt", "w"); // Очистка файла с данными в начале работы
     fclose(data);
-    
+
     for (int i = 0; i < STAGES; i++) {
         N = power(2, i);
         fillData(mass1, mass2, mass3, N * PACK); // заполняем массивы ОДИНАКОВЫМИ случайными числами
