@@ -9,6 +9,7 @@ library.o: library.cpp
 clean:
 	rm *.gch
 	rm *.o
+	rm OUT*.txt
 text: main.cpp headers.hpp library.cpp
 	cat main.cpp > main.txt
 	cat headers.hpp > headers.txt

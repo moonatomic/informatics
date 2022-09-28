@@ -32,11 +32,13 @@ private:
     void add_point(Point &point);
     std::vector<Point> points;
 public:
-    Field() {};
+    Field() {
+        points_amount = 0;
+    };
     // Field(const Field &field) {}; Конструктор копирования поля field
-    std::vector<Point> get_points(); // Функция получения точек из поля
+    std::vector<Point>* get_points(); // Функция получения точек из поля
     int get_amount(); // Возвращает количество точек
-    Point yield_point(int number); // Возвращает точку по номеру
+    Point* yield_point(int number); // Возвращает точку по номеру
     double distance(Point a, Point b);
     void generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y); 
     // Функция генерации облака точек: принимает количество точек, матожидание и стандартное отклонение (по Гауссу)
@@ -62,12 +64,14 @@ class Exec
 {
 private:
     int id;
+    int size;
     Field id_field;
-    std::vector< std::vector<Point> > clusters; // Набор кластеров как результат работы
+    std::vector< std::vector <bool> > rclusters; // Набор кластеров как результат работы
 public:
-    Exec(int process_id, Field field) { // Конструктор - принимает id процесса и ссылку на поле
+    Exec(int process_id, Field &field) { // Конструктор - принимает id процесса и ссылку на поле
         id = process_id;
         id_field = field;
+        size = field.get_amount();
     };
     void k_means(int k);
     void save();
