@@ -32,8 +32,6 @@ void Interface::start() {
     double deviation_x = 1;
     double deviation_y = 1;
 
-    std::cout << "Started" << std::endl;
-
     input.open("./INPUT.txt"); // Открываем входной файл
 
     while(true) {
@@ -66,7 +64,6 @@ void Interface::start() {
         }
         
     }
-    std::cout << "Got parameters"  << std::endl;
     input.close();
 
     controller.process(field, i, amount, center_x, center_x, deviation_x, deviation_y, method, kmeans); // Запускаем работу с полем
@@ -102,15 +99,14 @@ void Controller::process(Field &field, int process_id, int amount, double center
 void Field::generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y) {
     std::random_device rd{};
     std::mt19937 gen{rd()};
-    std::default_random_engine generator; // Настраиваем нормальное распределение
     std::normal_distribution<double> x_distribution(center_x, deviation_x);
     std::normal_distribution<double> y_distribution(center_y, deviation_y);
 
     for (int i = 0; i < amount; i++) { // Создаем amount точек с нормально распределенными координатами
         Point point;
         point.number = i;
-        point.x = x_distribution(generator);
-        point.y = y_distribution(generator);
+        point.x = x_distribution(rd);
+        point.y = y_distribution(rd);
         add_point(point);
     }
 }
@@ -193,10 +189,11 @@ void Exec::k_means(int k) {
                     min_dist = id_field.distance(point, centers[clust]);
                     attr = clust;
                 }
-                clusters[attr][point.number] = true;
             }
+            clusters[attr][point.number] = true;
         }
 
+        int clust = 0;
         for (std::vector<bool> cluster : clusters) {
             cluster_weight = 0;
             cluster_sum_x = 0;
@@ -209,12 +206,14 @@ void Exec::k_means(int k) {
                     cluster_weight++;
                 }
             }
-            fcenter = center;
+            center = centers[clust];
             center.x = cluster_sum_x/cluster_weight;
             center.y = cluster_sum_y/cluster_weight; 
-            if (id_field.distance(fcenter, center) > EPS) {
+            if (id_field.distance(centers[clust], center) > EPS) {
                 differ = true;
             }
+            centers[clust] = center;
+            clust++;
         }
 
         if (!differ || iters > 100) break;
