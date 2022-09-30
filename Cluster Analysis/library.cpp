@@ -22,6 +22,7 @@ void Interface::start() {
 
     std::string buff; // Буффер для распознавания команды конфигурации
 
+    int am = 0;
     int amount = 100; // Параметры облака
     int i = 0;
     int method; // Метод кластеризации
@@ -42,7 +43,15 @@ void Interface::start() {
         if (buff == "LOG") { // Если надо вести лог (TODO)
             input >> logging;
         } else if (buff == "AMOUNT") { // Принимаем основные параметры генерации
-            input >> amount;
+            input >> am;
+            amount += am;
+        } else if (buff == "BEGIN") {
+            std::cout << "Starting clusterization" << std::endl;
+            controller.clusterize(field, i, amount, method, kmeans);
+            std::cout << "Ended clusterization" << std::endl;
+        } else if (buff == "GENERATE") {
+            field.generate(amount, center_x, center_y, deviation_x, deviation_y);
+            std::cout << "Generated cloud" << std::endl;
         } else if (buff == "DEVX") {
             input >> deviation_x;
         } else if (buff == "DEVY") {
@@ -66,7 +75,7 @@ void Interface::start() {
     }
     input.close();
 
-    controller.process(field, i, amount, center_x, center_x, deviation_x, deviation_y, method, kmeans); // Запускаем работу с полем
+    controller.clusterize(field, i, amount, method, kmeans); // Запускаем работу с полем
 
      /*
     std::cout << "Hello! Enter center of cloud by X: "; // Спрашиваем параметры генерации облака
@@ -84,8 +93,7 @@ void Interface::start() {
 
 }
 
-void Controller::process(Field &field, int process_id, int amount, double center_x, double center_y, double deviation_x, double deviation_y, int method, int opt) {
-    field.generate(amount, center_x, center_y, deviation_x, deviation_y); // Генерируем облако на amount элементов с соответствующими параметрами
+void Controller::clusterize(Field &field, int process_id, int amount, int method, int opt) {
     // std::cout << "Generated cloud with " << field.points.size() << " points" << std::endl;
     Exec process(process_id, field); // Создаем новый процесс
     switch (method) { // В зависимости от метода кластеризации выполняем её
@@ -104,7 +112,7 @@ void Field::generate(int amount, double center_x, double center_y, double deviat
 
     for (int i = 0; i < amount; i++) { // Создаем amount точек с нормально распределенными координатами
         Point point;
-        point.number = i;
+        point.number = points_amount;
         point.x = x_distribution(rd);
         point.y = y_distribution(rd);
         add_point(point);
@@ -216,7 +224,7 @@ void Exec::k_means(int k) {
             clust++;
         }
 
-        if (!differ || iters > 100) break;
+        if (!differ || iters > 10000) break;
         iters++;
     }
     rclusters = clusters;

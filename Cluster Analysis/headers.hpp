@@ -25,10 +25,7 @@ public:
 class Field
 {
 private:
-    double center_x; // Центр облака
-    double center_y;
     int points_amount; // Количество точек в облаке
-
     void add_point(Point &point);
     std::vector<Point> points;
 public:
@@ -55,9 +52,7 @@ class Controller
 {
 public:
     Controller() {};
-    void process(Field &field, int process_id, int amount, double center_x, double center_y, double deviation_x, double deviation_y, int method, int opt); 
-    // Функция генерации облака точек: принимает количество точек, матожидание и стандартное отклонение (по Гауссу), 
-    // метод кластеризации и дополнительную информацию (k для k-средних)
+    void clusterize(Field &field, int process_id, int amount, int method, int opt); 
 };
 
 class Exec
@@ -68,10 +63,10 @@ private:
     Field id_field;
     std::vector< std::vector <bool> > rclusters; // Набор кластеров как результат работы
 public:
-    Exec(int process_id, Field &field) { // Конструктор - принимает id процесса и ссылку на поле
-        id = process_id;
-        id_field = field;
-        size = field.get_amount();
+    Exec(int _process_id, Field &_field) { // Конструктор - принимает id процесса и ссылку на поле
+        id = _process_id;
+        id_field = _field;
+        size = _field.get_amount();
     };
     void k_means(int k);
     void save();
