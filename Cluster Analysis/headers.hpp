@@ -2,6 +2,7 @@
 (c) 2022 Петров Михаил Вадимович группа 212
 */
 
+#pragma once
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -12,6 +13,7 @@ private:
 
 public:
     Point() {};
+    ~Point() {};
     Point(double _x, double _y) {
         x = _x;
         y = _y;
@@ -32,6 +34,7 @@ public:
     Field() {
         points_amount = 0;
     };
+    ~Field() {};
     // Field(const Field &field) {}; Конструктор копирования поля field
     std::vector<Point>* get_points(); // Функция получения точек из поля
     int get_amount(); // Возвращает количество точек
@@ -45,6 +48,7 @@ class Interface
 {
 public:
     Interface() {};
+    ~Interface() {};
     void start(); // Фактическое начало исполнения программы
 };
 
@@ -52,6 +56,7 @@ class Controller
 {
 public:
     Controller() {};
+    ~Controller() {};
     void clusterize(Field &field, int process_id, int amount, int method, int opt); 
 };
 
@@ -68,6 +73,7 @@ public:
         id_field = _field;
         size = _field.get_amount();
     };
+    ~Exec() {};
     void k_means(int k);
     void save();
 };
