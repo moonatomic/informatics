@@ -7,6 +7,8 @@ main.o: main.cpp
 library.o: library.cpp
 	clang++ -std=c++17 -c $^
 clean:
+	rm OUT*.txt
+	rm WAV*.txt
 	rm *.gch
 	rm *.o
 text: main.cpp headers.hpp library.cpp

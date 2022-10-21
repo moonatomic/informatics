@@ -26,7 +26,8 @@ void Interface::start() {
     int amount = 100; // Параметры облака
     int i = 0;
     int method; // Метод кластеризации
-    int kmeans; // k для k-средних
+    double opt; // k для k-средних, d для волнового алгоритма
+    int id;
     bool logging = 0;
     double center_x = 0;
     double center_y = 0;
@@ -43,15 +44,19 @@ void Interface::start() {
         if (buff == "LOG") { // Если надо вести лог (TODO)
             input >> logging;
         } else if (buff == "AMOUNT") { // Принимаем основные параметры генерации
-            input >> am;
-            amount += am;
+                input >> amount;
         } else if (buff == "BEGIN") {
             std::cout << "Starting clusterization" << std::endl;
-            controller.clusterize(field, i, amount, method, kmeans);
+            controller.clusterize(field, i, amount, method, opt);
             std::cout << "Ended clusterization" << std::endl;
         } else if (buff == "GENERATE") {
             field.generate(amount, center_x, center_y, deviation_x, deviation_y);
+            am = 0;
             std::cout << "Generated cloud" << std::endl;
+        } else if (buff == "SAVE") {
+            input >> id;
+            controller.save(id);
+            std::cout << "Saved process with id " << id << std::endl;
         } else if (buff == "DEVX") {
             input >> deviation_x;
         } else if (buff == "DEVY") {
@@ -64,7 +69,10 @@ void Interface::start() {
             input >> buff;
             if (buff == "KMEANS") {
                 method = 1;
-                input >> kmeans;
+                input >> opt;
+            } else if (buff == "WAVE") {
+                method = 2;
+                input >> opt;
             } else {
                 std::cout << "Wrong mode " << method << std::endl;
             }
@@ -74,34 +82,19 @@ void Interface::start() {
         
     }
     input.close();
-
-    controller.clusterize(field, i, amount, method, kmeans); // Запускаем работу с полем
-
-     /*
-    std::cout << "Hello! Enter center of cloud by X: "; // Спрашиваем параметры генерации облака
-    std::cin >> center_x;
-    std::cout << "Enter center of cloud by Y: ";
-    std::cin >> center_y;
-    std::cout << "Enter X deviation: ";
-    std::cin >> deviation_x;
-    std::cout << "Enter Y deviation ";
-    std::cin >> deviation_y;
-
-    std::cout << "Enter amount of points to generate: "; // Спрашиваем количество точек
-    std::cin >> amount;
-    */
-
 }
 
-void Controller::clusterize(Field &field, int process_id, int amount, int method, int opt) {
-    // std::cout << "Generated cloud with " << field.points.size() << " points" << std::endl;
+void Controller::clusterize(Field &field, int process_id, int amount, int method, double opt) {
     Exec process(process_id, field); // Создаем новый процесс
     switch (method) { // В зависимости от метода кластеризации выполняем её
-        default:
-            process.k_means(opt);
+        case 1:
+            process.k_means(int(opt));
+            break;
+        case 2:
+            process.wave(opt);
             break;
     }
-    process.save(); // Сохраняем слепок процесса
+    processes.push_back(process);
 }
 
 void Field::generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y) {
@@ -119,6 +112,14 @@ void Field::generate(int amount, double center_x, double center_y, double deviat
     }
 }
 
+int Field::get_amount() {
+    return points_amount;
+}
+
+double Field::distance(Point a, Point b) {
+    return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+}
+
 void Field::add_point(Point &point) { // Добавление точки в поле
     points.push_back(point); // Пушим точку в вектор точек поля
     points_amount++;
@@ -131,6 +132,10 @@ Point* Field::yield_point(int num) { // Вернуть точку по ее но
 std::vector<Point>* Field::get_points() {
     // std::cout << points.size() << std::endl;
     return &points; // Возвращаем (копию?) вектора точек
+}
+
+void Controller::save(int process_id) {
+    processes[process_id].save();
 }
 
 void Exec::save() { // Сохранение слепка поля
@@ -230,10 +235,101 @@ void Exec::k_means(int k) {
     rclusters = clusters;
 }
 
-int Field::get_amount() {
-    return points_amount;
-}
+void Exec::wave(double delta) {
+    std::vector<Point>* points = id_field.get_points();
+    std::vector<double> matrix;
+    std::vector<int> burnt;
+    std::vector<bool> cluster;
 
-double Field::distance(Point a, Point b) {
-    return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
+    std::string filename; 
+    std::ofstream out;
+
+    bool flag = false;
+    int clust;
+    int steps = 0;
+    int cluster_amount = 0;
+    int pamount = id_field.get_amount();
+
+    for (int i = 0; i < pamount; i++) {
+        burnt.push_back(0);
+    }
+
+    matrix.resize(pamount * pamount);
+    for (int i = 0; i < pamount; i++) {
+		for (int j = 0; j < pamount; j++) 
+        {
+			matrix[i * pamount + j] = id_field.distance((*points)[i], (*points)[j]);
+		}
+	}
+    
+    while(true) {
+        flag = true;
+        for (int i = 0; i < pamount; i++) {
+			if (burnt[i] == 0) {
+				burnt[i] = 1;
+				flag = 0;
+				break;
+			}
+		}
+        if (flag) {
+            break;
+        }
+
+        clust = 0;
+		flag = 1;
+		while (flag) {	
+			clust++;
+            steps++;
+			flag = 0;
+			for (int i = 0; i < pamount; i++) {	
+				if (burnt[i] == clust) {
+					for (int j = 0; j < pamount; j++) {	
+						if (matrix[i * pamount + j] < delta) {
+							if (burnt[j] == 0) {
+								burnt[j] = burnt[i] + 1;
+								flag = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+        cluster_amount++;
+		for (int i = 0; i < pamount; i++) {
+			if (burnt[i] > 0) {
+				burnt[i] = -cluster_amount;
+			}
+		}
+    }
+    // Для красивого вывода хода волны
+    /*
+    for (int i = 0; i < steps; i++) {
+        filename = "WAV" + std::to_string(i) + ".txt"; // File for every fired number
+        out.open(filename);
+        for (int j = 0; j < pamount; j++) {				
+            if (burnt[j] == burnt[i]+1) {
+                out << (*points)[j].x << " " << (*points)[j].y << std::endl;
+            }
+        }
+        out.close();
+	}
+    */
+
+    for (int i = 0; i < cluster_amount; i++) {
+        cluster.clear();
+        for (int k = 0; k < pamount; k++) {
+            cluster.push_back(false);
+        }
+        for (int j = 0; j < pamount; j++) {
+            if (burnt[j] == -(i+1)) {
+                cluster[j] = true;
+            } else {
+                cluster[j] = false;
+            }
+        }
+        rclusters.push_back(cluster);
+    }
+
+    matrix.clear();
+    burnt.clear();
 }
