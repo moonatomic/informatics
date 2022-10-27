@@ -75,6 +75,7 @@ public:
     ~Exec() {};
     void k_means(int k);
     void wave(double delta);
+    void DBSCAN(double delta, int k);
     void save();
 };
 
@@ -86,5 +87,5 @@ public:
     Controller() {};
     ~Controller() {};
     void save(int process_id);
-    void clusterize(Field &field, int process_id, int amount, int method, double opt); 
+    void clusterize(Field &field, int process_id, int method, double opt); 
 };

@@ -13,6 +13,7 @@
 
 #define MAXDST 100
 #define EPS 1e-5
+#define NEIGHBORS 7
 
 void Interface::start() {   
     Controller controller; // Создаем контроллер и поле
@@ -22,7 +23,6 @@ void Interface::start() {
 
     std::string buff; // Буффер для распознавания команды конфигурации
 
-    int am = 0;
     int amount = 100; // Параметры облака
     int i = 0;
     int method; // Метод кластеризации
@@ -47,11 +47,10 @@ void Interface::start() {
                 input >> amount;
         } else if (buff == "BEGIN") {
             std::cout << "Starting clusterization" << std::endl;
-            controller.clusterize(field, i, amount, method, opt);
+            controller.clusterize(field, i, method, opt);
             std::cout << "Ended clusterization" << std::endl;
         } else if (buff == "GENERATE") {
             field.generate(amount, center_x, center_y, deviation_x, deviation_y);
-            am = 0;
             std::cout << "Generated cloud" << std::endl;
         } else if (buff == "SAVE") {
             input >> id;
@@ -73,6 +72,9 @@ void Interface::start() {
             } else if (buff == "WAVE") {
                 method = 2;
                 input >> opt;
+            } else if (buff == "DBSCAN") {
+                method = 3;
+                input >> opt;
             } else {
                 std::cout << "Wrong mode " << method << std::endl;
             }
@@ -84,7 +86,7 @@ void Interface::start() {
     input.close();
 }
 
-void Controller::clusterize(Field &field, int process_id, int amount, int method, double opt) {
+void Controller::clusterize(Field &field, int process_id, int method, double opt) {
     Exec process(process_id, field); // Создаем новый процесс
     switch (method) { // В зависимости от метода кластеризации выполняем её
         case 1:
@@ -92,6 +94,9 @@ void Controller::clusterize(Field &field, int process_id, int amount, int method
             break;
         case 2:
             process.wave(opt);
+            break;
+        case 3:
+            process.DBSCAN(opt, NEIGHBORS);
             break;
     }
     processes.push_back(process);
@@ -144,7 +149,7 @@ void Exec::save() { // Сохранение слепка поля
 
     std::vector<Point>* points = id_field.get_points();    
     // std::cout << points.size() << std::endl;
-    for (int i = 0; i < rclusters.size(); i++) {
+    for (long unsigned int i = 0; i < rclusters.size(); i++) {
         filename = "OUT_" + std::to_string(id) + "_" + std::to_string(i) + ".txt"; // Открываем файл по id процесса и кластера
         out.open(filename); 
         for (Point point : *points) { 
@@ -256,8 +261,7 @@ void Exec::wave(double delta) {
 
     matrix.resize(pamount * pamount);
     for (int i = 0; i < pamount; i++) {
-		for (int j = 0; j < pamount; j++) 
-        {
+		for (int j = 0; j < pamount; j++) {
 			matrix[i * pamount + j] = id_field.distance((*points)[i], (*points)[j]);
 		}
 	}
@@ -276,7 +280,7 @@ void Exec::wave(double delta) {
         }
 
         clust = 0;
-		flag = 1;
+		flag = true;
 		while (flag) {	
 			clust++;
             steps++;
@@ -287,7 +291,7 @@ void Exec::wave(double delta) {
 						if (matrix[i * pamount + j] < delta) {
 							if (burnt[j] == 0) {
 								burnt[j] = burnt[i] + 1;
-								flag = 1;
+								flag = true;
 							}
 						}
 					}
@@ -301,6 +305,7 @@ void Exec::wave(double delta) {
 			}
 		}
     }
+
     // Для красивого вывода хода волны
     /*
     for (int i = 0; i < steps; i++) {
@@ -314,6 +319,114 @@ void Exec::wave(double delta) {
         out.close();
 	}
     */
+
+    for (int i = 0; i < cluster_amount; i++) {
+        cluster.clear();
+        for (int k = 0; k < pamount; k++) {
+            cluster.push_back(false);
+        }
+        for (int j = 0; j < pamount; j++) {
+            if (burnt[j] == -(i+1)) {
+                cluster[j] = true;
+            } else {
+                cluster[j] = false;
+            }
+        }
+        rclusters.push_back(cluster);
+    }
+
+    matrix.clear();
+    burnt.clear();
+}
+
+void Exec::DBSCAN(double delta, int k) {
+    std::vector<Point>* points = id_field.get_points();
+    std::vector<double> matrix;
+    std::vector<int> neighbors;
+    std::vector<int> ncpoint;
+    std::vector<int> burnt;
+    std::vector<bool> cluster;
+    std::vector<int> nncpoints;
+
+    std::string filename; 
+    std::ofstream out;
+
+    bool flag = false;
+    int clust;
+    int steps = 0;
+    int cluster_amount = 0;
+    int pamount = id_field.get_amount();
+    double dist;
+
+    for (int i = 0; i < pamount; i++) {
+        burnt.push_back(0);
+    }
+
+    matrix.resize(pamount * pamount);
+    for (int i = 0; i < pamount; i++) {
+        ncpoint.push_back(0);
+        neighbors.push_back(0);
+    }
+    for (int i = 0; i < pamount; i++) {
+        nncpoints.clear();
+		for (int j = 0; j < pamount; j++) {
+            dist = id_field.distance((*points)[i], (*points)[j]);
+			matrix[i * pamount + j] = dist;
+            if (dist < delta) {
+                neighbors[i]++;
+                neighbors[j]++;
+                nncpoints.push_back(j);
+                if (neighbors[i] >= k) {
+                    ncpoint[i] = 2; // Базовая точка
+                    for (int point : nncpoints) {
+                        if (ncpoint[point] != 2) {
+                            ncpoint[point] = 1;
+                        }
+                    }
+                }
+            }
+		}
+	}
+    
+    while(true) {
+        flag = true;
+        for (int i = 0; i < pamount; i++) {
+			if ((burnt[i] == 0) && (ncpoint[i] == 2)) {
+				burnt[i] = 1;
+				flag = 0;
+				break;
+			}
+		}
+        if (flag) {
+            break;
+        }
+
+        clust = 0;
+		flag = true;
+		while (flag) {	
+			clust++;
+            steps++;
+			flag = false;
+			for (int i = 0; i < pamount; i++) {	
+				if ((burnt[i] == clust) && (ncpoint[i] == 2)) {
+					for (int j = 0; j < pamount; j++) {	
+						if (matrix[i * pamount + j] < delta) {
+							if (burnt[j] == 0) {
+								burnt[j] = burnt[i] + 1;
+								flag = true;
+							}
+						}
+					}
+				}
+			}
+		}
+        cluster_amount++;
+		for (int i = 0; i < pamount; i++) {
+			if (burnt[i] > 0) {
+				burnt[i] = -cluster_amount;
+			}
+		}
+    }
 
     for (int i = 0; i < cluster_amount; i++) {
         cluster.clear();
