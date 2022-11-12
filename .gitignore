@@ -3,7 +3,7 @@
 *.gch
 *.out
 .DS_Store
-!out.txt
+!help.txt
 Playground/
 *.xcodeproj
 .vscode/

@@ -5,8 +5,7 @@
 #include "headers.hpp"
 #include <iostream>
 
-int main(int argc, const char * argv[]) 
-{
+int main(void) {
     Interface interface;
     interface.start();
     return 0;

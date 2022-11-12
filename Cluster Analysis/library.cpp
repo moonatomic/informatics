@@ -163,7 +163,7 @@ void Exec::save() { // Сохранение слепка поля
 }
 
 void Exec::k_means(int k) {
-    Point centers[k];
+    std::vector<Point> centers;
     Point center;
     Point fcenter;
 
@@ -175,6 +175,7 @@ void Exec::k_means(int k) {
     bool differ = false;
 
     int iters = 0;
+    centers.resize(k);
 
     std::vector<Point>* points = id_field.get_points();
     std::vector< std::vector<bool> > clusters; 
@@ -442,6 +443,32 @@ void Exec::DBSCAN(double delta, int k) {
         }
         rclusters.push_back(cluster);
     }
+    
+    // Для красивого вывода точек DBSCAN
+    /*
+    std::ofstream out;
+    out.open("DB_CORE.txt");
+    for (int i = 0; i < pamount; i++) {
+        if (ncpoint[i] == 2) {
+            out << (*points)[i].x << " " << (*points)[i].y << std::endl;
+        }
+    }
+    out.close();
+    out.open("DB_NEIGH.txt");
+    for (int i = 0; i < pamount; i++) {
+        if (ncpoint[i] == 1) {
+            out << (*points)[i].x << " " << (*points)[i].y << std::endl;
+        }
+    }
+    out.close();
+    out.open("DB_NOISE.txt");
+    for (int i = 0; i < pamount; i++) {
+        if (ncpoint[i] == 0) {
+            out << (*points)[i].x << " " << (*points)[i].y << std::endl;
+        }
+    }
+    out.close();
+    */
 
     matrix.clear();
     burnt.clear();
