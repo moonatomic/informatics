@@ -8,18 +8,22 @@
 #include <random>
 #include <vector>
 #include <cmath>
+#include <ctime>
 #include <iterator>
 #include <algorithm>
 
 #define MAXDST 100
 #define EPS 1e-5
-#define NEIGHBORS 7
+#define NEIGHBORS 5
 
 void Interface::start() {   
     Controller controller; // Создаем контроллер и поле
     Field field;
 
     std::ifstream input; // Входной файл с конфигурацией
+    std::ofstream log;
+
+    std::time_t timing = 0;
 
     std::string buff; // Буффер для распознавания команды конфигурации
 
@@ -28,7 +32,8 @@ void Interface::start() {
     int method; // Метод кластеризации
     double opt; // k для k-средних, d для волнового алгоритма
     int id;
-    bool logging = 0;
+    bool logging = false;
+    bool started = false;
     double center_x = 0;
     double center_y = 0;
     double deviation_x = 1;
@@ -43,19 +48,43 @@ void Interface::start() {
         input >> buff;
         if (buff == "LOG") { // Если надо вести лог (TODO)
             input >> logging;
+            if (logging) {
+                log.open("LOG.txt");
+                time(&timing);
+                log << "Started " << std::asctime(std::localtime(&timing)) << std::endl;
+            }
         } else if (buff == "AMOUNT") { // Принимаем основные параметры генерации
                 input >> amount;
         } else if (buff == "BEGIN") {
-            std::cout << "Starting clusterization" << std::endl;
+            if (logging) {
+                time(&timing);
+                log << "Starting clusterization " << std::asctime(std::localtime(&timing)) << std::endl;
+            }
             controller.clusterize(field, i, method, opt);
-            std::cout << "Ended clusterization" << std::endl;
+            if (logging) {
+                time(&timing);
+                log << "Ended clusterization " << std::asctime(std::localtime(&timing)) << std::endl;
+            }
         } else if (buff == "GENERATE") {
-            field.generate(amount, center_x, center_y, deviation_x, deviation_y);
-            std::cout << "Generated cloud" << std::endl;
+            if (!started) {
+                controller.generate(field, amount, center_x, center_y, deviation_x, deviation_y);
+                if (logging) {
+                    time(&timing);
+                    log << "Generated cloud " << std::asctime(std::localtime(&timing)) << std::endl;
+                }
+            } else {
+            if (logging) {
+                    time(&timing);
+                    log << "Prevented post-prpcessing generation " << std::asctime(std::localtime(&timing)) << std::endl;
+                }
+            }
         } else if (buff == "SAVE") {
             input >> id;
             controller.save(id);
-            std::cout << "Saved process with id " << id << std::endl;
+            if (logging) {
+                time(&timing);
+                log << "Saved process with id " << id << " " << std::asctime(std::localtime(&timing)) << std::endl;
+            }
         } else if (buff == "DEVX") {
             input >> deviation_x;
         } else if (buff == "DEVY") {
@@ -76,14 +105,21 @@ void Interface::start() {
                 method = 3;
                 input >> opt;
             } else {
-                std::cout << "Wrong mode " << method << std::endl;
+                if (logging) {
+                    time(&timing);
+                    log << "Wrong mode " << method << " " << std::asctime(std::localtime(&timing)) << std::endl;
+                }
             }
         } else {
-            std::cout << "Wrong parameter " << buff << std::endl;
+            if (logging) {
+                time(&timing);
+                log << "Wrong parameter " << buff << " " << std::asctime(std::localtime(&timing)) << std::endl;
+            }
         }
         
     }
     input.close();
+    log.close();
 }
 
 void Controller::clusterize(Field &field, int process_id, int method, double opt) {
@@ -102,7 +138,12 @@ void Controller::clusterize(Field &field, int process_id, int method, double opt
     processes.push_back(process);
 }
 
+void Controller::generate(Field &field, int amount, double center_x, double center_y, double deviation_x, double deviation_y) {
+    field.generate(amount, center_x, center_y, deviation_x, deviation_y);
+}
+
 void Field::generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y) {
+    Cloud *cloud = new Cloud();
     std::random_device rd{};
     std::mt19937 gen{rd()};
     std::normal_distribution<double> x_distribution(center_x, deviation_x);
@@ -114,7 +155,10 @@ void Field::generate(int amount, double center_x, double center_y, double deviat
         point.x = x_distribution(rd);
         point.y = y_distribution(rd);
         add_point(point);
+        (*cloud).add_point(&point);
+        (*cloud).size++;
     }
+    clouds.push_back(cloud);
 }
 
 int Field::get_amount() {
@@ -137,6 +181,11 @@ Point* Field::yield_point(int num) { // Вернуть точку по ее но
 std::vector<Point>* Field::get_points() {
     // std::cout << points.size() << std::endl;
     return &points; // Возвращаем (копию?) вектора точек
+}
+
+void Cloud::add_point(Point * point) {
+    points.push_back(point);
+    size++;
 }
 
 void Controller::save(int process_id) {
@@ -443,7 +492,7 @@ void Exec::DBSCAN(double delta, int k) {
         }
         rclusters.push_back(cluster);
     }
-    
+
     // Для красивого вывода точек DBSCAN
     /*
     std::ofstream out;
