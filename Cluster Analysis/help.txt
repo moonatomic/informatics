@@ -1,10 +1,11 @@
-LOG <0/1>       Логгирование выкл/вкл
-DEVX <double>   Стандартное отклонение по X
-DEVY <double>   Стандартное отклонение по Y
-CENTX <double>  Матожидание (центр облака) по X
-CENTY <double>  Матожидание (центр облака) по Y
-AMOUNT <int>    Количество точек в облаке
-GENERATE        Генерация облака
-MODE <string>   Метод кластеризации (KMEANS/DBSCAN/WAVE итд)
-BEGIN           Запуск кластеризации
-SAVE <int>      Сохранение процесса с данным id
+LOG <0/1>                               Логгирование выкл/вкл
+DEVX <double>                           Стандартное отклонение по X
+DEVY <double>                           Стандартное отклонение по Y
+CENTX <double>                          Матожидание (центр облака) по X
+CENTY <double>                          Матожидание (центр облака) по Y
+AMOUNT <int>                            Количество точек в облаке
+GENERATE                                Генерация облака
+TRANSFORM <int> TRANSLATE/SCALE/ROTATE  Аффинные преобразования облака с данным номером
+MODE <string>                           Метод кластеризации (KMEANS/DBSCAN/WAVE итд)
+BEGIN                                   Запуск кластеризации
+SAVE <int>                              Сохранение процесса с данным id

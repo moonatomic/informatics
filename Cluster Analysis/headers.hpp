@@ -1,3 +1,7 @@
+/*
+(c) 2022 Петров Михаил Вадимович группа 212
+*/
+
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -16,28 +20,33 @@ public:
     double x;
     double y;
     int number;
-    int color;
 };
 
 class Cloud
 {
 private:
-    std::vector<Point *> points;
 public:
     int size = 0;
+    int number = 0;
     void add_point(Point * point);
     std::vector<double> factors;
+    std::vector<Point *> points;
+    Cloud(int num) {
+        number = num;
+    }
 };
 
 class Buffer
 {
 private:
-    int points_amount;
-    std::vector<Point *> points;
 public:
-    void copy_cloud(Cloud cloud);
-    void rotate(Point center);
-    void scale(Point center, int lambda);
+    int points_amount = 0;
+    Buffer() {};
+    ~Buffer() {};
+    std::vector<Point *> points;
+    void copy_cloud(Cloud * cloud);
+    void rotate(Point center, double phi);
+    void scale(Point center, double lambda);
     void translate(std::vector<double> vec);
 };
 
@@ -45,21 +54,24 @@ class Field
 {
 private:
     int points_amount;
-    void add_point(Point &point);
+    int clouds_amount;
+    void add_point(Point * point);
     std::vector<Cloud *> clouds;
-    std::vector<Point> points;
+    std::vector<Point *> points;
 public:
     //Point vPoint;
     //Cloud vCloud;
     //Buffer vBuffer;
     Field() {
         points_amount = 0;
+        clouds_amount = 0;
     };
     ~Field() {};
-    std::vector<Point>* get_points();
+    std::vector<Point *> get_points();
     int get_amount();
     Point* yield_point(int number);
     double distance(Point a, Point b);
+    void transform(int cloud_number, int transform_type, double parameter1, double parameter2, double parameter3, double parameter4);
     void generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y); 
 };
 
@@ -103,6 +115,7 @@ public:
     Controller() {};
     ~Controller() {};
     void save(int process_id);
+    void transform(Field &field, int cloud_number, int transform_type, double parameter1, double parameter2, double parameter3, double parameter4);
     void clusterize(Field &field, int process_id, int method, double opt); 
     void generate(Field &field, int amount, double center_x, double center_y, double deviation_x, double deviation_y); 
 };

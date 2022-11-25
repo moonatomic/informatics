@@ -17,21 +17,22 @@
 #define NEIGHBORS 5
 
 void Interface::start() {   
-    Controller controller; // Создаем контроллер и поле
+    Controller controller;
     Field field;
 
-    std::ifstream input; // Входной файл с конфигурацией
+    std::ifstream input;
     std::ofstream log;
 
     std::time_t timing = 0;
 
-    std::string buff; // Буффер для распознавания команды конфигурации
+    std::string buff;
 
-    int amount = 100; // Параметры облака
+    int amount = 100;
     int i = 0;
-    int method; // Метод кластеризации
-    double opt; // k для k-средних, d для волнового алгоритма
+    int method;
+    double opt;
     int id;
+    int cloud_number;
     bool logging = false;
     bool started = false;
     double center_x = 0;
@@ -39,23 +40,32 @@ void Interface::start() {
     double deviation_x = 1;
     double deviation_y = 1;
 
-    input.open("./INPUT.txt"); // Открываем входной файл
+    int transform_type;
+    double transform_center_x;
+    double transform_center_y;
+    double transform_phi;
+    double transform_lambda;
+    double transform_vector_x;
+    double transform_vector_y;
+
+    input.open("./INPUT.txt");
 
     while(true) {
         if (input.eof()) {
             break;
         }
         input >> buff;
-        if (buff == "LOG") { // Если надо вести лог (TODO)
+        if (buff == "LOG") {
             input >> logging;
             if (logging) {
                 log.open("LOG.txt");
                 time(&timing);
                 log << "Started " << std::asctime(std::localtime(&timing)) << std::endl;
             }
-        } else if (buff == "AMOUNT") { // Принимаем основные параметры генерации
+        } else if (buff == "AMOUNT") {
                 input >> amount;
         } else if (buff == "BEGIN") {
+            started = true;
             if (logging) {
                 time(&timing);
                 log << "Starting clusterization " << std::asctime(std::localtime(&timing)) << std::endl;
@@ -75,7 +85,7 @@ void Interface::start() {
             } else {
             if (logging) {
                     time(&timing);
-                    log << "Prevented post-prpcessing generation " << std::asctime(std::localtime(&timing)) << std::endl;
+                    log << "Prevented post-processing generation " << std::asctime(std::localtime(&timing)) << std::endl;
                 }
             }
         } else if (buff == "SAVE") {
@@ -85,6 +95,39 @@ void Interface::start() {
                 time(&timing);
                 log << "Saved process with id " << id << " " << std::asctime(std::localtime(&timing)) << std::endl;
             }
+        } else if (buff == "TRANSFORM") {
+            input >> cloud_number;
+            input >> buff;
+            if (buff == "ROTATE") {
+                transform_type = 0;
+                input >> transform_center_x;
+                input >> transform_center_y;
+                input >> transform_phi;
+                controller.transform(field, cloud_number, transform_type, transform_center_x, transform_center_y, transform_phi, 0);
+                if (logging) {
+                    time(&timing);
+                    log << "Rotated cloud " << cloud_number << " " << std::asctime(std::localtime(&timing)) << std::endl;
+                }
+            } else if (buff == "TRANSLATE") {
+                transform_type = 1;
+                input >> transform_vector_x;
+                input >> transform_vector_y;
+                controller.transform(field, cloud_number, transform_type, transform_vector_x, transform_vector_y, 0, 0);
+                if (logging) {
+                    time(&timing);
+                    log << "Translated cloud " << cloud_number << " " << std::asctime(std::localtime(&timing)) << std::endl;
+                }
+            } else if (buff == "SCALE") {
+                transform_type = 2;
+                input >> transform_center_x;
+                input >> transform_center_y;
+                input >> transform_lambda;
+                controller.transform(field, cloud_number, transform_type, transform_center_x, transform_center_y, transform_lambda, 0);
+                if (logging) {
+                    time(&timing);
+                    log << "Scaled cloud " << cloud_number << " " << std::asctime(std::localtime(&timing)) << std::endl;
+                }
+            }
         } else if (buff == "DEVX") {
             input >> deviation_x;
         } else if (buff == "DEVY") {
@@ -93,6 +136,8 @@ void Interface::start() {
             input >> center_x;
         } else if (buff == "CENTY") {
             input >> center_y;
+        } else if (buff == "END") {
+            break;
         } else if (buff == "MODE") {
             input >> buff;
             if (buff == "KMEANS") {
@@ -123,8 +168,8 @@ void Interface::start() {
 }
 
 void Controller::clusterize(Field &field, int process_id, int method, double opt) {
-    Exec process(process_id, field); // Создаем новый процесс
-    switch (method) { // В зависимости от метода кластеризации выполняем её
+    Exec process(process_id, field);
+    switch (method) {
         case 1:
             process.k_means(int(opt));
             break;
@@ -143,22 +188,41 @@ void Controller::generate(Field &field, int amount, double center_x, double cent
 }
 
 void Field::generate(int amount, double center_x, double center_y, double deviation_x, double deviation_y) {
-    Cloud *cloud = new Cloud();
+    Cloud * cloud = new Cloud(clouds_amount);
+
     std::random_device rd{};
     std::mt19937 gen{rd()};
     std::normal_distribution<double> x_distribution(center_x, deviation_x);
     std::normal_distribution<double> y_distribution(center_y, deviation_y);
 
-    for (int i = 0; i < amount; i++) { // Создаем amount точек с нормально распределенными координатами
-        Point point;
-        point.number = points_amount;
-        point.x = x_distribution(rd);
-        point.y = y_distribution(rd);
+    for (int i = 0; i < amount; i++) {
+        Point * point = new Point;
+        (*point).number = points_amount;
+        (*point).x = x_distribution(rd);
+        (*point).y = y_distribution(rd);
         add_point(point);
-        (*cloud).add_point(&point);
+        (*cloud).add_point(point);
         (*cloud).size++;
     }
     clouds.push_back(cloud);
+    clouds_amount++;
+}
+
+void Field::transform(int cloud_number, int transform_type, double parameter1, double parameter2, double parameter3, double parameter4) {
+    Buffer * buffer = new Buffer();
+    (*buffer).copy_cloud(clouds[cloud_number]);
+    if (transform_type == 0) {
+        Point center(parameter1, parameter2);
+        (*buffer).rotate(center, parameter3);
+    } else if (transform_type == 1) {
+        std::vector<double> vec;
+        vec.push_back(parameter1);
+        vec.push_back(parameter2);
+        (*buffer).translate(vec);
+    } else if (transform_type == 2) {
+        Point center(parameter1, parameter2);
+        (*buffer).scale(center, parameter3);
+    }
 }
 
 int Field::get_amount() {
@@ -169,42 +233,43 @@ double Field::distance(Point a, Point b) {
     return sqrt((a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y));
 }
 
-void Field::add_point(Point &point) { // Добавление точки в поле
-    points.push_back(point); // Пушим точку в вектор точек поля
+void Field::add_point(Point * point) {
+    points.push_back(point);
     points_amount++;
 }
 
-Point* Field::yield_point(int num) { // Вернуть точку по ее номеру
-    return &points[num];
+Point* Field::yield_point(int num) {
+    return points[num];
 }
 
-std::vector<Point>* Field::get_points() {
-    // std::cout << points.size() << std::endl;
-    return &points; // Возвращаем (копию?) вектора точек
+std::vector<Point *> Field::get_points() {
+    return points;
 }
 
 void Cloud::add_point(Point * point) {
     points.push_back(point);
-    size++;
 }
 
 void Controller::save(int process_id) {
     processes[process_id].save();
 }
 
-void Exec::save() { // Сохранение слепка поля
+void Controller::transform(Field &field, int cloud_number, int transform_type, double parameter1, double parameter2, double parameter3, double parameter4) {
+    field.transform(cloud_number, transform_type, parameter1, parameter2, parameter3, parameter4);
+}
+
+void Exec::save() {
     std::string filename; 
     std::ofstream out;
 
-    std::vector<Point>* points = id_field.get_points();    
-    // std::cout << points.size() << std::endl;
+    std::vector<Point *> points = id_field.get_points();    
     for (long unsigned int i = 0; i < rclusters.size(); i++) {
-        filename = "OUT_" + std::to_string(id) + "_" + std::to_string(i) + ".txt"; // Открываем файл по id процесса и кластера
+        filename = "OUT_" + std::to_string(id) + "_" + std::to_string(i) + ".txt";
         out.open(filename); 
-        for (Point point : *points) { 
-            int num = point.number;
+        for (Point * point : points) { 
+            int num = (*point).number;
             if(rclusters[i][num]) {
-                out << point.x << " " << point.y << std::endl;
+                out << (*point).x << " " << (*point).y << std::endl;
             }
         }
         out.close();
@@ -226,7 +291,7 @@ void Exec::k_means(int k) {
     int iters = 0;
     centers.resize(k);
 
-    std::vector<Point>* points = id_field.get_points();
+    std::vector<Point *> points = id_field.get_points();
     std::vector< std::vector<bool> > clusters; 
 
     for (int j = 0; j < k; j++) {
@@ -250,15 +315,15 @@ void Exec::k_means(int k) {
             }
         }
 
-        for (Point point : *points) {
+        for (Point * point : points) {
             min_dist = MAXDST;
             for (int clust = 0; clust < k; clust++) {
-                if (id_field.distance(point, centers[clust]) < min_dist) {
-                    min_dist = id_field.distance(point, centers[clust]);
+                if (id_field.distance(*point, centers[clust]) < min_dist) {
+                    min_dist = id_field.distance(*point, centers[clust]);
                     attr = clust;
                 }
             }
-            clusters[attr][point.number] = true;
+            clusters[attr][(*point).number] = true;
         }
 
         int clust = 0;
@@ -291,7 +356,7 @@ void Exec::k_means(int k) {
 }
 
 void Exec::wave(double delta) {
-    std::vector<Point>* points = id_field.get_points();
+    std::vector<Point *> points = id_field.get_points();
     std::vector<double> matrix;
     std::vector<int> burnt;
     std::vector<bool> cluster;
@@ -312,7 +377,7 @@ void Exec::wave(double delta) {
     matrix.resize(pamount * pamount);
     for (int i = 0; i < pamount; i++) {
 		for (int j = 0; j < pamount; j++) {
-			matrix[i * pamount + j] = id_field.distance((*points)[i], (*points)[j]);
+			matrix[i * pamount + j] = id_field.distance(*(points[i]), *(points[j]));
 		}
 	}
     
@@ -390,7 +455,7 @@ void Exec::wave(double delta) {
 }
 
 void Exec::DBSCAN(double delta, int k) {
-    std::vector<Point>* points = id_field.get_points();
+    std::vector<Point *> points = id_field.get_points();
     std::vector<double> matrix;
     std::vector<int> neighbors;
     std::vector<int> ncpoint;
@@ -420,14 +485,14 @@ void Exec::DBSCAN(double delta, int k) {
     for (int i = 0; i < pamount; i++) {
         nncpoints.clear();
 		for (int j = 0; j < pamount; j++) {
-            dist = id_field.distance((*points)[i], (*points)[j]);
+            dist = id_field.distance(*(points[i]), *(points[j]));
 			matrix[i * pamount + j] = dist;
             if (dist < delta) {
                 neighbors[i]++;
                 neighbors[j]++;
                 nncpoints.push_back(j);
                 if (neighbors[i] >= k) {
-                    ncpoint[i] = 2; // Базовая точка
+                    ncpoint[i] = 2;
                     for (int point : nncpoints) {
                         if (ncpoint[point] != 2) {
                             ncpoint[point] = 1;
@@ -521,4 +586,59 @@ void Exec::DBSCAN(double delta, int k) {
 
     matrix.clear();
     burnt.clear();
+}
+
+void Buffer::translate(std::vector<double> vec) {
+    std::ofstream out;
+    out.open("OUT_0_1.txt");
+    for (Point * point : points) {
+        (*point).x = (*point).x + vec[0];
+        (*point).y = (*point).y + vec[1];
+        out << (*point).x << " " << (*point).y<< std::endl;
+    }
+    out.close();
+}
+
+void Buffer::copy_cloud(Cloud * cloud) {
+    points.clear();
+    for (Point * point : (*cloud).points) {
+        points.push_back(point);
+        points_amount++;
+    }
+}
+
+void Buffer::scale(Point center, double lambda) {
+    std::vector<double> vec;
+    vec.resize(2);
+    vec[0] = -center.x;
+    vec[1] = -center.y;
+    translate(vec);
+    for (Point * point : points) {
+        (*point).x *= lambda;
+        (*point).y *= lambda;
+    }
+    vec[0] = center.x;
+    vec[1] = center.y;
+    translate(vec);
+}
+
+void Buffer::rotate(Point center, double phi) {
+    double _x, _y;
+    double x, y;
+    std::vector<double> vec;
+    vec.resize(2);
+    vec[0] = -center.x;
+    vec[1] = -center.y;
+    translate(vec);
+    for (Point * point : points) {
+        x = (*point).x;
+        y = (*point).y;
+        _x = x*cos(phi*M_PI/180) - y*sin(phi*M_PI/180);
+        _y = x*sin(phi*M_PI/180) + y*cos(phi*M_PI/180);
+        (*point).x = _x;
+        (*point).y = _y;
+    }
+    vec[0] = center.x;
+    vec[1] = center.y;
+    translate(vec);
 }
